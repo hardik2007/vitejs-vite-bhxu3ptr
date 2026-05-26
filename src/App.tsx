@@ -1196,7 +1196,7 @@ export default function DSATracker() {
                               return (
                                 <div
                                   key={day.day}
-                                  ref={(el) => (dayRefs.current[day.day] = el)}
+                                  ref={(el) => { dayRefs.current[day.day] = el; }}
                                   style={{ margin: "6px 10px", border: `1px solid ${isCurrent ? phase.color + "55" : "#1e1e2e"}`, borderRadius: 6, overflow: "hidden", background: isCurrent ? `${phase.color}06` : "transparent" }}
                                 >
                                   {/* Day header */}

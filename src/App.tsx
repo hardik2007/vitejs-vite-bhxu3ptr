@@ -1,6 +1,39 @@
 import { useState, useEffect, useRef } from "react";
 
-const PHASES = [
+interface TaskTracker {
+  id: string;
+  label: string;
+}
+
+interface DayData {
+  day: number;
+  tasks: TaskTracker[];
+}
+
+interface WeekData {
+  week: number;
+  theme: string;
+  days: DayData[];
+}
+
+interface PhaseData {
+  id: string;
+  name: string;
+  label: string;
+  months: string;
+  color: string;
+  accent: string;
+  weeks: WeekData[];
+}
+
+interface DayMapEntry {
+  phase: string;
+  week: number;
+  day: number;
+  tasks: TaskTracker[];
+}
+
+const PHASES: PhaseData[] = [
   {
     id: "p1",
     name: "Phase 1",
@@ -923,8 +956,8 @@ const PHASES = [
   },
 ];
 
-function buildDayMap() {
-  const map = {};
+function buildDayMap(): Record<number, DayMapEntry> {
+  const map: Record<number, DayMapEntry> = {};
   PHASES.forEach((phase) => {
     phase.weeks.forEach((week) => {
       week.days.forEach((day) => {
@@ -939,12 +972,12 @@ const DAY_MAP = buildDayMap();
 const TOTAL_DAYS = Object.keys(DAY_MAP).length;
 
 export default function DSATracker() {
-  const [checked, setChecked] = useState({});
-  const [currentDay, setCurrentDay] = useState(1);
-  const [expandedPhase, setExpandedPhase] = useState("p1");
-  const [expandedWeek, setExpandedWeek] = useState(1);
-  const [loaded, setLoaded] = useState(false);
-  const dayRefs = useRef({});
+  const [checked, setChecked] = useState<Record<string, boolean>>({});
+  const [currentDay, setCurrentDay] = useState<number>(1);
+  const [expandedPhase, setExpandedPhase] = useState<string | null>("p1");
+  const [expandedWeek, setExpandedWeek] = useState<number | null>(1);
+  const [loaded, setLoaded] = useState<boolean>(false);
+  const dayRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
   useEffect(() => {
     try {
@@ -967,11 +1000,11 @@ export default function DSATracker() {
     } catch {}
   }, [checked, currentDay, expandedPhase, expandedWeek, loaded]);
 
-  const toggleTask = (taskId) => {
+  const toggleTask = (taskId: string) => {
     setChecked((prev) => ({ ...prev, [taskId]: !prev[taskId] }));
   };
 
-  const isDayComplete = (day) => {
+  const isDayComplete = (day: number) => {
     const dayData = DAY_MAP[day];
     if (!dayData) return false;
     return dayData.tasks.every((t) => checked[t.id]);
@@ -983,7 +1016,7 @@ export default function DSATracker() {
 
   const completedDays = Object.keys(DAY_MAP).filter((d) => isDayComplete(parseInt(d))).length;
 
-  const goToDay = (dayNum) => {
+  const goToDay = (dayNum: number) => {
     const dayData = DAY_MAP[dayNum];
     if (!dayData) return;
     setCurrentDay(dayNum);
@@ -998,7 +1031,7 @@ export default function DSATracker() {
     });
     setTimeout(() => {
       if (dayRefs.current[dayNum]) {
-        dayRefs.current[dayNum].scrollIntoView({ behavior: "smooth", block: "center" });
+        dayRefs.current[dayNum]?.scrollIntoView({ behavior: "smooth", block: "center" });
       }
     }, 100);
   };
@@ -1209,7 +1242,7 @@ export default function DSATracker() {
                                   {!dayComplete && (
                                     <div
                                       onClick={() => {
-                                        const updates = {};
+                                        const updates: Record<string, boolean> = {};
                                         day.tasks.forEach((t) => (updates[t.id] = true));
                                         setChecked((prev) => ({ ...prev, ...updates }));
                                         if (DAY_MAP[day.day + 1]) setCurrentDay(day.day + 1);
